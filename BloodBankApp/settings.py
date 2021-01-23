@@ -37,8 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Api'
+    'Api',
+    'fcm_django',
 ]
+
+FCM_DJANGO_SETTINGS = {
+        "FCM_SERVER_KEY": "AAAACFdDl3M:APA91bHvXpa6lh8Te3f6ziA4lzSkGlCso72GYO87LdY8mMLAS53ZfmL95mDdQxwMmJdN9EO3a-T-cWf6xR_80ztpT52-MCm33NxtOFtCyerKDNV70rJGCXwK1zgSDyjTl3aipxYc44ci"
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

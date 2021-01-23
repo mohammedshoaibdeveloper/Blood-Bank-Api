@@ -80,8 +80,17 @@ class User_Signup(APIView):
                 }
                 return Response(message)
 
+            checkPhoneNumber = Signup.objects.filter(PhoneNumber = PhoneNumber)
+            if checkPhoneNumber:
+                message = {
+                'status' : False,
+                'message' : "Mobile Number Already Exist",
 
-            data = Signup(Full_Name = Full_Name , Username = Username,Email = Email,Password = Password,Sender_ID = Sender_ID,Device_type= Device_type,Image  = Image,latitude = latitude,longitude = longitude)
+                }
+                return Response(message)
+
+
+            data = Signup(Full_Name = Full_Name , Username = Username,Email = Email,Password = Password,Sender_ID = Sender_ID,Device_type= Device_type,latitude = latitude,longitude = longitude,Location=Location,PhoneNumber=PhoneNumber,Gender = Gender,Bloodgroup = Bloodgroup)
             data.save()
 
             userid = data.id
