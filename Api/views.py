@@ -8,9 +8,9 @@ from django.conf import settings
 from passlib.hash import django_pbkdf2_sha256 as handler
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from .models import Signup,SerSignup
-
-
+from .models import Signup,SerSignup,Request_Blood,SerRequest_Blood,Donate_Blood,SerDonate_Blood
+from fcm_django.models import FCMDevice
+from django.db.models import Q
 class User_Signup(APIView):
 
     def get(self,request):
@@ -218,3 +218,415 @@ class Login(APIView):
                     'message': str(e)
                 }
             return Response(message)
+
+
+
+
+
+###PatientEditProfile
+class EditProfile(APIView):
+    def post(self,request):
+
+        try:
+
+            id = request.data.get('id')
+
+            Full_Name=request.data.get('Full_Name',False)
+
+            oldpassword = request.data.get('oldpassword',False)
+
+
+
+            newpassword = request.data.get('newpassword',False)
+            
+            Image = request.FILES.get('Image',False)
+
+            userObject = Signup.objects.get(id = id)
+
+
+
+            if handler.verify(oldpassword,userObject.Password):
+
+            
+
+                
+
+                if newpassword:
+                    userObject.Password = handler.hash(newpassword)
+
+                    userObject.save()
+
+
+                if Full_Name:
+                    userObject.Full_Name = Full_Name
+                    userObject.save()
+
+
+
+                if Image:
+                    userObject.Image = Image
+                    userObject.save()
+
+                userdata = SerSignup(userObject)
+
+                message = {
+                'status' : True,
+                'message' : "Edit Successfully",
+                'data':userdata.data
+
+                }
+
+
+               
+                return Response(message)
+
+            else:
+
+                message = {
+                'status' : False,
+                'message' : "Your Old Password Doesn't Match",
+                
+
+                }
+
+                return Response(message)
+
+
+
+
+        except Exception as e:
+            Message={
+                    'status' : False,
+                    'message': str(e)
+                }
+            return Response(Message)
+
+
+
+
+class requestBlood(APIView):
+
+
+    def get(self,request):
+
+        
+        try:
+
+            id=request.GET['id']
+            data = Request_Blood.objects.get(User_id = id)
+            serializer = SerRequest_Blood(data)
+            message={
+
+                'status' : True,
+                'data':serializer.data
+
+            }
+            
+             
+
+
+            return Response(message)
+
+        except:
+            message={
+                'status' : False,
+
+            }
+            return Response(message)
+
+
+
+
+    def post(self , request):
+
+        try:
+
+       
+
+            id=request.data.get('id')
+            Blood_for=request.data.get('Blood_for')
+            First_Name=request.data.get('First_Name')
+            Last_Name=request.data.get('Last_Name')
+            DOB=request.data.get('DOB')
+            Gender=request.data.get('Gender')
+            Bloodgroup=request.data.get('Bloodgroup')
+            Address=request.data.get('Address')
+            Message_to_Donor=request.data.get('Message_to_Donor')
+
+            id = Signup.objects.get(id  = id)
+            
+
+            
+
+            
+
+            data = Request_Blood(User_id = id , Blood_for = Blood_for,First_Name = First_Name,Last_Name = Last_Name,DOB = DOB,Gender= Gender,Bloodgroup = Bloodgroup,Address = Address,Message_to_Donor=Message_to_Donor)
+            data.save()
+
+            
+
+            message = {
+
+                "status" : True,
+                "message" : "Submit Blood Request Successfully",
+                
+
+
+            }
+
+            return Response(message)
+
+
+        except Exception as e:
+
+            data={
+                    'status' : False,
+                    'message': str(e)
+                }
+            return Response(data)
+
+
+
+
+
+
+
+class donateBlood(APIView):
+
+
+    def get(self,request):
+
+        
+        try:
+
+            id=request.GET['id']
+            data = Donate_Blood.objects.get(User_id = id)
+            serializer = SerDonate_Blood(data)
+            message={
+
+                'status' : True,
+                'data':serializer.data
+
+            }
+            
+             
+
+
+            return Response(message)
+
+        except:
+            message={
+                'status' : False,
+
+            }
+            return Response(message)
+
+
+
+
+    def post(self , request):
+
+        try:
+
+       
+
+            id=request.data.get('id')
+            First_Name=request.data.get('First_Name')
+            Last_Name=request.data.get('Last_Name')
+            DOB=request.data.get('DOB')
+            Gender=request.data.get('Gender')
+            Bloodgroup=request.data.get('Bloodgroup')
+            Address=request.data.get('Address')
+            Place_to_Donate=request.data.get('Place_to_Donate')
+
+            id = Signup.objects.get(id  = id)
+            
+
+            
+
+            
+
+            data = Donate_Blood(User_id = id ,First_Name = First_Name,Last_Name = Last_Name,DOB = DOB,Gender= Gender,Bloodgroup = Bloodgroup,Address = Address,Place_to_Donate=Place_to_Donate)
+            data.save()
+
+            
+
+            message = {
+
+                "status" : True,
+                "message" : "Submit Donate Blood Data Successfully",
+                
+
+
+            }
+
+            return Response(message)
+
+
+        except Exception as e:
+
+            data={
+                    'status' : False,
+                    'message': str(e)
+                }
+            return Response(data)
+
+
+
+
+
+class MyBloodRequest(APIView):
+
+
+    def post(self , request):
+
+        try:
+
+       
+
+            id=request.data.get('id')
+            First_Name=request.data.get('First_Name')
+            Last_Name=request.data.get('Last_Name')
+            DOB=request.data.get('DOB')
+            Gender=request.data.get('Gender')
+            Bloodgroup=request.data.get('Bloodgroup')
+            Address=request.data.get('Address')
+            Place_to_Donate=request.data.get('Place_to_Donate')
+
+            id = Signup.objects.get(id  = id)
+            
+
+
+            data = Donate_Blood(User_id = id ,First_Name = First_Name,Last_Name = Last_Name,DOB = DOB,Gender= Gender,Bloodgroup = Bloodgroup,Address = Address,Place_to_Donate=Place_to_Donate)
+            data.save()
+
+            
+
+            message = {
+
+                "status" : True,
+                "message" : "Submit Donate Blood Data Successfully",
+                
+
+
+            }
+
+            return Response(message)
+
+
+        except Exception as e:
+
+            data={
+                    'status' : False,
+                    'message': str(e)
+                }
+            return Response(data)
+
+
+
+
+class DonateBlood(APIView):
+
+
+
+
+    def post(self , request):
+
+        # try:
+
+       
+
+        requester_id=request.data.get('requester_id')
+        donater_id=request.data.get('donater_id')
+
+        donate_object = Donate_Blood.objects.get(User_id  = donater_id)
+        requester_object = Request_Blood.objects.get(User_id = requester_id)
+
+        Donate_Blood_Status = donate_object.Donate_Blood_Status
+
+        Donate_Blood_object = Donate_Blood.objects.get(User_id = requester_id)
+
+
+        
+
+        if Donate_Blood_Status == "Donate":
+
+            message = {
+
+            "status" : False,
+            "message" : "You are Already Donate Blood",
+            
+
+
+            }
+
+            return Response(message)
+
+        if donate_object.Bloodgroup ==  requester_object.Bloodgroup:
+
+            donate_object.Donate_Blood_Status = "Donate"
+            donate_object.save()
+
+            requester_object.Request_Blood_Status="Donate"
+            requester_object.Donor_id = Donate_Blood_object
+            requester_object.save()
+
+
+
+
+
+
+
+            message = {
+
+            "status" : True,
+            "message" : "Successfully Donate Blood",
+            
+
+
+            }
+
+            return Response(message)
+
+
+        else:
+
+
+            message = {
+
+                "status" : False,
+                "message" : "Blood Group Doesn't Match",
+                
+
+
+                }
+
+            return Response(message)
+
+        
+
+
+        
+        # data.save()
+
+        
+
+        # message = {
+
+        #     "status" : True,
+        #     "message" : "Submit Donate Blood Data Successfully",
+            
+
+
+        # }
+
+        # return Response(message)
+
+
+        # except Exception as e:
+
+        #     data={
+        #             'status' : False,
+        #             'message': str(e)
+        #         }
+        #     return Response(data)
